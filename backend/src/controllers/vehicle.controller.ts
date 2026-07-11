@@ -26,4 +26,23 @@ export class VehicleController {
       res.status(500).json({ error: 'Failed to retrieve vehicles' });
     }
   }
+
+  static async searchVehicles(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { make, model, category, minPrice, maxPrice } = req.query;
+
+      const filters = {
+        make: make as string,
+        model: model as string,
+        category: category as string,
+        minPrice: minPrice as string,
+        maxPrice: maxPrice as string
+      };
+
+      const vehicles = await Vehicle.search(filters);
+      res.status(200).json(vehicles);
+    } catch {
+      res.status(500).json({ error: 'Failed to search vehicles' });
+    }
+  }
 }
