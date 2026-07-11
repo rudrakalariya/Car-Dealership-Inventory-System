@@ -19,8 +19,9 @@ describe('Vehicle Routes', () => {
       const response = await request(app).post('/api/vehicles').send({
         make: 'Toyota',
         model: 'Corolla',
-        year: 2020,
-        price: 20000
+        category: 'Sedan',
+        price: 20000,
+        quantity: 5
       });
 
       expect(response.status).toBe(401);
@@ -34,8 +35,9 @@ describe('Vehicle Routes', () => {
         .send({
           make: 'Toyota',
           model: 'Corolla',
-          year: 2020,
-          price: 20000
+          category: 'Sedan',
+          price: 20000,
+          quantity: 5
         });
 
       expect(response.status).toBe(401);
@@ -43,18 +45,17 @@ describe('Vehicle Routes', () => {
     });
 
     it('should return 201 and create vehicle on successful request with valid token', async () => {
-      const validToken = generateToken({ id: 1, role: 'dealership' });
+      const validToken = generateToken({ id: 1, role: 'admin' });
 
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
             id: 1,
-            dealership_id: 1,
             make: 'Toyota',
             model: 'Corolla',
-            year: 2020,
+            category: 'Sedan',
             price: 20000,
-            status: 'available',
+            quantity: 5,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }
@@ -67,14 +68,16 @@ describe('Vehicle Routes', () => {
         .send({
           make: 'Toyota',
           model: 'Corolla',
-          year: 2020,
-          price: 20000
+          category: 'Sedan',
+          price: 20000,
+          quantity: 5
         });
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('make', 'Toyota');
-      expect(response.body).toHaveProperty('dealership_id', 1);
+      expect(response.body).toHaveProperty('category', 'Sedan');
+      expect(response.body).toHaveProperty('quantity', 5);
     });
   });
 });
