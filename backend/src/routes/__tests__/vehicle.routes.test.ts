@@ -240,4 +240,90 @@ describe('Vehicle Routes', () => {
       expect(response.body).toEqual([]);
     });
   });
+
+  describe('PUT /api/vehicles/:id', () => {
+    const updateData = {
+      make: 'Toyota',
+      model: 'Camry',
+      category: 'Sedan',
+      price: 25000,
+      quantity: 10
+    };
+
+    it('should return 401 if token is missing', async () => {
+      const response = await request(app).put('/api/vehicles/1').send(updateData);
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should update all fields with valid data', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            ...updateData,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ]
+      });
+
+      const response = await request(app)
+        .put('/api/vehicles/1')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send(updateData);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('make', 'Toyota');
+      expect(response.body).toHaveProperty('model', 'Camry');
+      expect(response.body).toHaveProperty('price', 25000);
+    });
+
+    it('should support partial field updates', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      const partialData = { price: 26000 };
+
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          { id: 1, make: 'Toyota', model: 'Camry', category: 'Sedan', quantity: 10, price: 26000 }
+        ]
+      });
+
+      const response = await request(app)
+        .put('/api/vehicles/1')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send(partialData);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('price', 26000);
+    });
+
+    it('should return 404 for non-existent vehicles', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // Simulate DB returning 0 rows
+
+      const response = await request(app)
+        .put('/api/vehicles/999')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send(updateData);
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should validate and reject invalid data', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      const invalidData = { price: -5000 }; // Negative price should fail validation
+
+      const response = await request(app)
+        .put('/api/vehicles/1')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send(invalidData);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
+  });
 });
