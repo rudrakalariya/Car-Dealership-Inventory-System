@@ -326,4 +326,48 @@ describe('Vehicle Routes', () => {
       expect(response.body).toHaveProperty('error');
     });
   });
+
+  describe('DELETE /api/vehicles/:id', () => {
+    it('should return 401 if token is missing', async () => {
+      const response = await request(app).delete('/api/vehicles/1');
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should reject non-admin users with 403', async () => {
+      // customer token
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      const response = await request(app)
+        .delete('/api/vehicles/1')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should allow admin to delete vehicle', async () => {
+      const adminToken = generateToken({ id: 2, role: 'admin' });
+      mockQuery.mockResolvedValueOnce({ rowCount: 1 }); // Simulate DB returning 1 deleted row
+
+      const response = await request(app)
+        .delete('/api/vehicles/1')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).toBe(204);
+      // Ensure the query was called properly
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('DELETE'), [1]);
+    });
+
+    it('should return 404 for non-existent vehicle', async () => {
+      const adminToken = generateToken({ id: 2, role: 'admin' });
+      mockQuery.mockResolvedValueOnce({ rowCount: 0 }); // Simulate DB returning 0 deleted rows
+
+      const response = await request(app)
+        .delete('/api/vehicles/999')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error');
+    });
+  });
 });
