@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { Vehicle } from '../models/vehicle.model';
-import { validateVehicle } from '../utils/validators';
+import { validateVehicle, validateVehicleUpdate } from '../utils/validators';
 
 export class VehicleController {
   static async createVehicle(req: AuthRequest, res: Response): Promise<void> {
@@ -43,6 +43,32 @@ export class VehicleController {
       res.status(200).json(vehicles);
     } catch {
       res.status(500).json({ error: 'Failed to search vehicles' });
+    }
+  }
+
+  static async updateVehicle(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid vehicle ID' });
+        return;
+      }
+
+      const validatedData = validateVehicleUpdate(req.body);
+
+      const vehicle = await Vehicle.update(id, validatedData as Record<string, unknown>);
+      if (!vehicle) {
+        res.status(404).json({ error: 'Vehicle not found' });
+        return;
+      }
+
+      res.status(200).json(vehicle);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: 'Unknown error occurred' });
+      }
     }
   }
 }

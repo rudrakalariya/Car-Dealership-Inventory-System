@@ -95,3 +95,22 @@ export const validateVehicle = (data: unknown) => {
     throw error;
   }
 };
+
+export const VehicleUpdateSchema = VehicleSchema.partial();
+
+export const validateVehicleUpdate = (data: unknown) => {
+  try {
+    return VehicleUpdateSchema.parse(data);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      if (error.issues && error.issues.length > 0) {
+        const issue = error.issues[0];
+        if (issue) {
+          throw new Error(issue.message, { cause: error });
+        }
+      }
+      throw new Error('Validation failed', { cause: error });
+    }
+    throw error;
+  }
+};

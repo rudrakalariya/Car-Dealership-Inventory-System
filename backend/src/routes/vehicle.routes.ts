@@ -7,5 +7,6 @@ const router = Router();
 router.post('/', authenticateToken, authenticateCustomer, VehicleController.createVehicle);
 router.get('/search', authenticateToken, authenticateCustomer, VehicleController.searchVehicles);
 router.get('/', authenticateToken, authenticateCustomer, VehicleController.getAllVehicles);
+router.put('/:id', authenticateToken, authenticateCustomer, VehicleController.updateVehicle);
 
 export default router;

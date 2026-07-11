@@ -42,4 +42,32 @@ export class Vehicle {
     const result = await query(text, values);
     return result.rows;
   }
+
+  static async update(
+    id: number,
+    data: Record<string, unknown>
+  ): Promise<Record<string, unknown> | null> {
+    const keys = Object.keys(data);
+    if (keys.length === 0) {
+      // If no data to update, just return the existing record or throw?
+      // Better to fetch and return existing if no update data
+      const existing = await query(`SELECT * FROM vehicles WHERE id = $1`, [id]);
+      return existing.rows[0] || null;
+    }
+
+    let queryStr = 'UPDATE vehicles SET ';
+    const values: (string | number)[] = [];
+
+    keys.forEach((key, index) => {
+      queryStr += `${key} = $${index + 1}, `;
+      values.push(data[key] as string | number);
+    });
+
+    // Add updated_at
+    queryStr += `updated_at = NOW() WHERE id = $${values.length + 1} RETURNING *`;
+    values.push(id);
+
+    const result = await query(queryStr, values);
+    return result.rows[0] || null;
+  }
 }
