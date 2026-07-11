@@ -19,5 +19,6 @@ router.post(
   authenticateCustomer,
   VehicleController.purchaseVehicle
 );
+router.post('/:id/restock', authenticateToken, authenticateAdmin, VehicleController.restockVehicle);
 
 export default router;

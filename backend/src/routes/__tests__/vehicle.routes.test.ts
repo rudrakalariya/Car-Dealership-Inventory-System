@@ -456,9 +456,7 @@ describe('Vehicle Routes', () => {
     });
 
     it('should allow admin to restock vehicle and increase quantity', async () => {
-      // First query to check vehicle existence
-      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 2 }] });
-      // Second query to update stock
+      // Query to update stock
       mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 7 }] });
 
       const response = await request(app)

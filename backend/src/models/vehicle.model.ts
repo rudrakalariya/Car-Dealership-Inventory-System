@@ -103,4 +103,20 @@ export class Vehicle {
 
     return { success: true, vehicle: updateResult.rows[0] };
   }
+
+  static async restock(
+    id: number,
+    quantity: number
+  ): Promise<{ success: boolean; error?: string; vehicle?: Record<string, unknown> }> {
+    const updateResult = await query(
+      'UPDATE vehicles SET quantity = quantity + $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [quantity, id]
+    );
+
+    if (updateResult.rows.length === 0) {
+      return { success: false, error: 'Vehicle not found' };
+    }
+
+    return { success: true, vehicle: updateResult.rows[0] };
+  }
 }

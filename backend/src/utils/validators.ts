@@ -68,3 +68,6 @@ export const PurchaseSchema = z.object({
 });
 
 export const validatePurchase = (data: unknown) => validateData(PurchaseSchema, data);
+
+export const RestockSchema = PurchaseSchema;
+export const validateRestock = (data: unknown) => validateData(RestockSchema, data);

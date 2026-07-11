@@ -1,7 +1,12 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { Vehicle } from '../models/vehicle.model';
-import { validateVehicle, validateVehicleUpdate, validatePurchase } from '../utils/validators';
+import {
+  validateVehicle,
+  validateVehicleUpdate,
+  validatePurchase,
+  validateRestock
+} from '../utils/validators';
 
 export class VehicleController {
   static async createVehicle(req: AuthRequest, res: Response): Promise<void> {
@@ -114,6 +119,33 @@ export class VehicleController {
       }
 
       res.status(200).json({ message: 'Purchase successful', vehicle: result.vehicle });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: 'Unknown error occurred' });
+      }
+    }
+  }
+
+  static async restockVehicle(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid vehicle ID' });
+        return;
+      }
+
+      const { quantity } = validateRestock(req.body);
+
+      const result = await Vehicle.restock(id, quantity);
+
+      if (!result.success) {
+        res.status(404).json({ error: result.error });
+        return;
+      }
+
+      res.status(200).json({ message: 'Restock successful', vehicle: result.vehicle });
     } catch (error: unknown) {
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
