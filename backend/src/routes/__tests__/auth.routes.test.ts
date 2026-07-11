@@ -83,5 +83,61 @@ describe('Auth Routes', () => {
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error', 'Invalid email address');
     });
+
+    it('should return 400 if username already exists', async () => {
+      // Mock the database throwing a unique constraint violation for username
+      mockQuery.mockRejectedValueOnce({
+        code: '23505',
+        constraint: 'users_username_key'
+      });
+
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'duplicateuser',
+        email: 'second@example.com',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Username already exists');
+    });
+
+    it('should return 400 if email already exists', async () => {
+      // Mock the database throwing a unique constraint violation for email
+      mockQuery.mockRejectedValueOnce({
+        code: '23505',
+        constraint: 'users_email_key'
+      });
+
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'seconduser',
+        email: 'duplicate@example.com',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Email already exists');
+    });
+
+    it('should return 400 if password is less than 6 characters', async () => {
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'testuser1',
+        email: 'test@example.com',
+        password: 'short'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Password must be at least 6 characters');
+    });
+
+    it('should return 400 if password is more than 20 characters', async () => {
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'testuser1',
+        email: 'test@example.com',
+        password: 'thispasswordiswaytoolongtobeaccepted'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Password must not exceed 20 characters');
+    });
   });
 });
