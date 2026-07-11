@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { User } from '../models/user.model';
 import { validateUserRegistration, validateUserLogin } from '../utils/validators';
-import jwt from 'jsonwebtoken';
+import { generateToken } from '../utils/tokenGenerator';
 
 export class AuthController {
   static async register(req: Request, res: Response): Promise<void> {
@@ -42,11 +42,7 @@ export class AuthController {
       }
 
       // Generate JWT
-      const token = jwt.sign(
-        { id: user.id, role: user.role },
-        process.env.JWT_SECRET || 'supersecretfallback',
-        { expiresIn: '24h' }
-      );
+      const token = generateToken({ id: user.id, role: user.role });
 
       // Remove password from response
       const userWithoutPassword = { ...user } as Record<string, unknown>;
