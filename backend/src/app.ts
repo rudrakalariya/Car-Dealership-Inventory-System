@@ -6,6 +6,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes will be added here
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Server is running',
+  });
+});
 
 export default app;
