@@ -1,5 +1,5 @@
-import { Vehicle } from '../vehicle.model';
 import * as db from '../../config/db';
+import { validateVehicle } from '../../utils/validators';
 
 jest.mock('../../config/db', () => ({
   query: jest.fn()
@@ -27,68 +27,68 @@ describe('Vehicle Model', () => {
   });
 
   describe('Validation', () => {
-    it('should throw an error if make is missing', async () => {
-      await expect(
-        Vehicle.create({ model: 'Corolla', category: 'Sedan', price: 25000, quantity: 10 })
-      ).rejects.toThrow('Make is required');
+    it('should throw an error if make is missing', () => {
+      expect(() =>
+        validateVehicle({ model: 'Corolla', category: 'Sedan', price: 25000, quantity: 10 })
+      ).toThrow('Make is required');
     });
 
-    it('should throw an error if model is missing', async () => {
-      await expect(
-        Vehicle.create({ make: 'Toyota', category: 'Sedan', price: 25000, quantity: 10 })
-      ).rejects.toThrow('Model is required');
+    it('should throw an error if model is missing', () => {
+      expect(() =>
+        validateVehicle({ make: 'Toyota', category: 'Sedan', price: 25000, quantity: 10 })
+      ).toThrow('Model is required');
     });
 
-    it('should throw an error if category is missing', async () => {
-      await expect(
-        Vehicle.create({ make: 'Toyota', model: 'Corolla', price: 25000, quantity: 10 })
-      ).rejects.toThrow('Category is required');
+    it('should throw an error if category is missing', () => {
+      expect(() =>
+        validateVehicle({ make: 'Toyota', model: 'Corolla', price: 25000, quantity: 10 })
+      ).toThrow('Category is required');
     });
 
-    it('should throw an error if price is missing', async () => {
-      await expect(
-        Vehicle.create({ make: 'Toyota', model: 'Corolla', category: 'Sedan', quantity: 10 })
-      ).rejects.toThrow('Price is required');
+    it('should throw an error if price is missing', () => {
+      expect(() =>
+        validateVehicle({ make: 'Toyota', model: 'Corolla', category: 'Sedan', quantity: 10 })
+      ).toThrow('Price is required');
     });
 
-    it('should throw an error if quantity is missing', async () => {
-      await expect(
-        Vehicle.create({ make: 'Toyota', model: 'Corolla', category: 'Sedan', price: 25000 })
-      ).rejects.toThrow('Quantity is required');
+    it('should throw an error if quantity is missing', () => {
+      expect(() =>
+        validateVehicle({ make: 'Toyota', model: 'Corolla', category: 'Sedan', price: 25000 })
+      ).toThrow('Quantity is required');
     });
 
-    it('should throw an error if price is not positive', async () => {
-      await expect(
-        Vehicle.create({
+    it('should throw an error if price is not positive', () => {
+      expect(() =>
+        validateVehicle({
           make: 'Toyota',
           model: 'Corolla',
           category: 'Sedan',
           price: -500,
           quantity: 10
         })
-      ).rejects.toThrow('Price must be a positive number');
+      ).toThrow('Price must be a positive number');
 
-      await expect(
-        Vehicle.create({
+      expect(() =>
+        validateVehicle({
           make: 'Toyota',
           model: 'Corolla',
           category: 'Sedan',
           price: 0,
           quantity: 10
         })
-      ).rejects.toThrow('Price must be a positive number');
+      ).toThrow('Price must be a positive number');
     });
 
-    it('should throw an error if quantity is a negative integer', async () => {
-      await expect(
-        Vehicle.create({
+    it('should throw an error if quantity is a negative integer', () => {
+      expect(() =>
+        validateVehicle({
           make: 'Toyota',
           model: 'Corolla',
           category: 'Sedan',
           price: 25000,
           quantity: -1
         })
-      ).rejects.toThrow('Quantity must be a non-negative integer');
+      ).toThrow('Quantity must be a non-negative integer');
     });
   });
 });

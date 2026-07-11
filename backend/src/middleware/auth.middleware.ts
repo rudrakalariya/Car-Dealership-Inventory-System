@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/tokenGenerator';
 
+import jwt from 'jsonwebtoken';
+
 export interface AuthRequest extends Request {
-  user?: any; // The decoded JWT payload
+  user?: jwt.JwtPayload | string | Record<string, unknown>; // The decoded JWT payload
 }
 
 export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
@@ -18,7 +20,19 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     const decoded = verifyToken(token);
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ error: 'Invalid token.' });
   }
 };
+
+export const authorizeRole = (roles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
+      return;
+    }
+    next();
+  };
+};
+
+export const authenticateCustomer = authorizeRole(['customer']);

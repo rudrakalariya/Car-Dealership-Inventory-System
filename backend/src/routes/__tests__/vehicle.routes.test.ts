@@ -45,7 +45,7 @@ describe('Vehicle Routes', () => {
     });
 
     it('should return 201 and create vehicle on successful request with valid token', async () => {
-      const validToken = generateToken({ id: 1, role: 'admin' });
+      const validToken = generateToken({ id: 1, role: 'customer' });
 
       mockQuery.mockResolvedValueOnce({
         rows: [

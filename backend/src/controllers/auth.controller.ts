@@ -42,7 +42,7 @@ export class AuthController {
       }
 
       // Generate JWT
-      const token = generateToken({ id: user.id, role: user.role });
+      const token = generateToken({ id: user.id, username: user.username, role: user.role });
 
       // Remove password from response
       const userWithoutPassword = { ...user } as Record<string, unknown>;
