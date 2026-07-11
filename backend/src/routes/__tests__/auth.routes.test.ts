@@ -72,5 +72,16 @@ describe('Auth Routes', () => {
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error', 'Password is required');
     });
+
+    it('should return 400 if email is invalid', async () => {
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'testuser1',
+        email: 'not-an-email',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid email address');
+    });
   });
 });
