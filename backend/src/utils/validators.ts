@@ -31,3 +31,30 @@ export const validateUserRegistration = (data: unknown) => {
     throw error;
   }
 };
+
+export const UserLoginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required')
+});
+
+export const validateUserLogin = (data: unknown) => {
+  try {
+    return UserLoginSchema.parse(data);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      if (error.issues && error.issues.length > 0) {
+        const issue = error.issues[0];
+        if (issue) {
+          let message = issue.message;
+          if (message.includes('expected string, received undefined') || message === 'Required') {
+            const field = String(issue.path[0]);
+            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+          }
+          throw new Error(message, { cause: error });
+        }
+      }
+      throw new Error('Validation failed', { cause: error });
+    }
+    throw error;
+  }
+};

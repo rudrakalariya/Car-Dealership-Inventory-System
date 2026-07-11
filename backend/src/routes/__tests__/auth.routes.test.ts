@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import * as db from '../../config/db';
+import bcrypt from 'bcrypt';
 
 jest.mock('../../config/db', () => ({
   query: jest.fn()
@@ -143,6 +144,8 @@ describe('Auth Routes', () => {
 
   describe('POST /api/auth/login', () => {
     it('should return 200 and a token for successful login', async () => {
+      const hashed = await bcrypt.hash('password123', 10);
+
       // Mock the database finding the user
       mockQuery.mockResolvedValueOnce({
         rows: [
@@ -150,7 +153,7 @@ describe('Auth Routes', () => {
             id: 1,
             username: 'testuser',
             email: 'test@example.com',
-            password: 'hashedpassword123',
+            password: hashed,
             role: 'customer'
           }
         ]
@@ -201,7 +204,21 @@ describe('Auth Routes', () => {
     });
 
     it('should return 401 if password is incorrect', async () => {
-      // We'll mock the user existing, but the comparePassword logic will fail it
+      const hashed = await bcrypt.hash('password123', 10);
+
+      // We'll mock the user existing, but the comparePassword logic will fail it because we send 'wrongpassword'
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            username: 'testuser',
+            email: 'test@example.com',
+            password: hashed,
+            role: 'customer'
+          }
+        ]
+      });
+
       const response = await request(app).post('/api/auth/login').send({
         email: 'test@example.com',
         password: 'wrongpassword'

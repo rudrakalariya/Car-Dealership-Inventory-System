@@ -33,4 +33,9 @@ export class User {
   static async comparePassword(plainText: string, hash: string): Promise<boolean> {
     return bcrypt.compare(plainText, hash);
   }
+
+  static async findByEmail(email: string): Promise<Record<string, unknown> | null> {
+    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
+    return result.rows[0] || null;
+  }
 }

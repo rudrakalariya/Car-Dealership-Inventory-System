@@ -17,9 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes for fast lookups (UNIQUE constraints already create indexes, but explicit indexes are good practice for search fields)
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+-- Indexes for fast lookups (UNIQUE constraints automatically create indexes)
+-- Removed redundant idx_users_username and idx_users_email
 
 -- Vehicles Table
 CREATE TABLE IF NOT EXISTS vehicles (
