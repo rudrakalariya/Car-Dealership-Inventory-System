@@ -13,5 +13,11 @@ router.get('/search', authenticateToken, authenticateCustomer, VehicleController
 router.get('/', authenticateToken, authenticateCustomer, VehicleController.getAllVehicles);
 router.put('/:id', authenticateToken, authenticateCustomer, VehicleController.updateVehicle);
 router.delete('/:id', authenticateToken, authenticateAdmin, VehicleController.deleteVehicle);
+router.post(
+  '/:id/purchase',
+  authenticateToken,
+  authenticateCustomer,
+  VehicleController.purchaseVehicle
+);
 
 export default router;

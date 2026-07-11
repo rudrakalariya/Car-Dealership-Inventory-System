@@ -75,4 +75,34 @@ export class Vehicle {
     const result = await query('DELETE FROM vehicles WHERE id = $1', [id]);
     return (result.rowCount ?? 0) > 0;
   }
+
+  static async purchase(
+    id: number,
+    quantity: number
+  ): Promise<{ success: boolean; error?: string; vehicle?: Record<string, unknown> }> {
+    // 1. Check if vehicle exists and get current quantity
+    const checkResult = await query('SELECT quantity FROM vehicles WHERE id = $1', [id]);
+
+    if (checkResult.rows.length === 0) {
+      return { success: false, error: 'Vehicle not found' };
+    }
+
+    const currentQuantity = checkResult.rows[0].quantity as number;
+
+    if (currentQuantity === 0) {
+      return { success: false, error: 'Vehicle is out of stock' };
+    }
+
+    if (currentQuantity < quantity) {
+      return { success: false, error: 'Insufficient stock' };
+    }
+
+    // 2. Perform purchase update
+    const updateResult = await query(
+      'UPDATE vehicles SET quantity = quantity - $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [quantity, id]
+    );
+
+    return { success: true, vehicle: updateResult.rows[0] };
+  }
 }

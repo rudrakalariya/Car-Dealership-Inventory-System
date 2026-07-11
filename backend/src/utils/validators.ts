@@ -62,3 +62,9 @@ export const validateVehicle = (data: unknown) => validateData(VehicleSchema, da
 export const VehicleUpdateSchema = VehicleSchema.partial();
 
 export const validateVehicleUpdate = (data: unknown) => validateData(VehicleUpdateSchema, data);
+
+export const PurchaseSchema = z.object({
+  quantity: z.number().int('Quantity must be an integer').positive('Quantity must be at least 1')
+});
+
+export const validatePurchase = (data: unknown) => validateData(PurchaseSchema, data);
