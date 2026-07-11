@@ -17,4 +17,13 @@ export class VehicleController {
       }
     }
   }
+
+  static async getAllVehicles(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const vehicles = await Vehicle.getAll();
+      res.status(200).json(vehicles);
+    } catch {
+      res.status(500).json({ error: 'Failed to retrieve vehicles' });
+    }
+  }
 }

@@ -11,4 +11,13 @@ export class Vehicle {
 
     return result.rows[0];
   }
+
+  static async getAll(): Promise<Record<string, unknown>[]> {
+    const result = await query(
+      `SELECT id, make, model, category, price, quantity, created_at, updated_at 
+       FROM vehicles 
+       ORDER BY created_at DESC`
+    );
+    return result.rows;
+  }
 }
