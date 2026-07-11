@@ -1,4 +1,5 @@
 import { query } from '../config/db';
+import { QueryBuilder } from '../utils/queryBuilder';
 
 export class Vehicle {
   static async create(data: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -28,38 +29,17 @@ export class Vehicle {
     minPrice?: string;
     maxPrice?: string;
   }): Promise<Record<string, unknown>[]> {
-    let queryStr = `SELECT id, make, model, category, price, quantity, created_at, updated_at 
-                    FROM vehicles WHERE 1=1`;
-    const values: (string | number)[] = [];
+    const { text, values } = new QueryBuilder('vehicles')
+      .select(['id', 'make', 'model', 'category', 'price', 'quantity', 'created_at', 'updated_at'])
+      .whereIlike('make', filters.make)
+      .whereIlike('model', filters.model)
+      .whereIlike('category', filters.category)
+      .whereGte('price', filters.minPrice)
+      .whereLte('price', filters.maxPrice)
+      .orderBy('created_at', 'DESC')
+      .build();
 
-    if (filters.make) {
-      values.push(`%${filters.make}%`);
-      queryStr += ` AND make ILIKE $${values.length}`;
-    }
-
-    if (filters.model) {
-      values.push(`%${filters.model}%`);
-      queryStr += ` AND model ILIKE $${values.length}`;
-    }
-
-    if (filters.category) {
-      values.push(`%${filters.category}%`);
-      queryStr += ` AND category ILIKE $${values.length}`;
-    }
-
-    if (filters.minPrice) {
-      values.push(parseFloat(filters.minPrice));
-      queryStr += ` AND price >= $${values.length}`;
-    }
-
-    if (filters.maxPrice) {
-      values.push(parseFloat(filters.maxPrice));
-      queryStr += ` AND price <= $${values.length}`;
-    }
-
-    queryStr += ` ORDER BY created_at DESC`;
-
-    const result = await query(queryStr, values);
+    const result = await query(text, values);
     return result.rows;
   }
 }
