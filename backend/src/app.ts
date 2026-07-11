@@ -13,14 +13,20 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     message: 'Server is running',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   });
 });
 
+import { initDB } from './config/init-db';
+
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+
+  // Initialize DB schema before starting the server
+  initDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
   });
 }
 
