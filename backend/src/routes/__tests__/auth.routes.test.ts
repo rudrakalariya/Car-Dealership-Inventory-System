@@ -140,4 +140,75 @@ describe('Auth Routes', () => {
       expect(response.body).toHaveProperty('error', 'Password must not exceed 20 characters');
     });
   });
+
+  describe('POST /api/auth/login', () => {
+    it('should return 200 and a token for successful login', async () => {
+      // Mock the database finding the user
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'hashedpassword123',
+            role: 'customer'
+          }
+        ]
+      });
+
+      // Assuming comparePassword will return true since we mock bcrypt in a way
+      // Actually wait, comparePassword runs actual bcrypt, so we need to either mock comparePassword or just expect 404 for now since endpoint is missing.
+      // We will refine the mock when we implement GREEN, but for RED, just sending the request is enough.
+
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('user');
+    });
+
+    it('should return 400 if email is missing', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Email is required');
+    });
+
+    it('should return 400 if password is missing', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Password is required');
+    });
+
+    it('should return 401 if user does not exist', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // User not found
+
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error', 'Invalid email or password');
+    });
+
+    it('should return 401 if password is incorrect', async () => {
+      // We'll mock the user existing, but the comparePassword logic will fail it
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'wrongpassword'
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error', 'Invalid email or password');
+    });
+  });
 });
