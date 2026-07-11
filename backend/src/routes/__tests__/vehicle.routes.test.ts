@@ -433,4 +433,64 @@ describe('Vehicle Routes', () => {
       expect(response.body).toHaveProperty('error', 'Vehicle not found');
     });
   });
+
+  describe('POST /api/vehicles/:id/restock', () => {
+    const adminToken = generateToken({ id: 2, role: 'admin' });
+    const vehicleBase = { id: 1, make: 'Honda', model: 'Civic', category: 'Sedan', price: 20000 };
+
+    it('should return 401 if token is missing', async () => {
+      const response = await request(app).post('/api/vehicles/1/restock').send({ quantity: 5 });
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should reject non-admin users with 403', async () => {
+      const customerToken = generateToken({ id: 1, role: 'customer' });
+      const response = await request(app)
+        .post('/api/vehicles/1/restock')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({ quantity: 5 });
+
+      expect(response.status).toBe(403);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should allow admin to restock vehicle and increase quantity', async () => {
+      // First query to check vehicle existence
+      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 2 }] });
+      // Second query to update stock
+      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 7 }] });
+
+      const response = await request(app)
+        .post('/api/vehicles/1/restock')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ quantity: 5 });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'Restock successful');
+      expect(response.body.vehicle).toHaveProperty('quantity', 7);
+    });
+
+    it('should validate restock quantity (reject negative values)', async () => {
+      const response = await request(app)
+        .post('/api/vehicles/1/restock')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ quantity: -2 });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should return 404 for non-existent vehicle', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // DB returns 0 rows for vehicle check
+
+      const response = await request(app)
+        .post('/api/vehicles/999/restock')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ quantity: 5 });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error', 'Vehicle not found');
+    });
+  });
 });
