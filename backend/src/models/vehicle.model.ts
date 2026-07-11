@@ -70,4 +70,9 @@ export class Vehicle {
     const result = await query(queryStr, values);
     return result.rows[0] || null;
   }
+
+  static async delete(id: number): Promise<boolean> {
+    const result = await query('DELETE FROM vehicles WHERE id = $1', [id]);
+    return (result.rowCount ?? 0) > 0;
+  }
 }

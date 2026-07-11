@@ -36,3 +36,4 @@ export const authorizeRole = (roles: string[]) => {
 };
 
 export const authenticateCustomer = authorizeRole(['customer']);
+export const authenticateAdmin = authorizeRole(['admin']);

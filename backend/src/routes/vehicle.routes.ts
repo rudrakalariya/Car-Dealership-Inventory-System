@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { VehicleController } from '../controllers/vehicle.controller';
-import { authenticateToken, authenticateCustomer } from '../middleware/auth.middleware';
+import {
+  authenticateToken,
+  authenticateCustomer,
+  authenticateAdmin
+} from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -8,5 +12,6 @@ router.post('/', authenticateToken, authenticateCustomer, VehicleController.crea
 router.get('/search', authenticateToken, authenticateCustomer, VehicleController.searchVehicles);
 router.get('/', authenticateToken, authenticateCustomer, VehicleController.getAllVehicles);
 router.put('/:id', authenticateToken, authenticateCustomer, VehicleController.updateVehicle);
+router.delete('/:id', authenticateToken, authenticateAdmin, VehicleController.deleteVehicle);
 
 export default router;
