@@ -370,4 +370,67 @@ describe('Vehicle Routes', () => {
       expect(response.body).toHaveProperty('error');
     });
   });
+
+  describe('POST /api/vehicles/:id/purchase', () => {
+    const validToken = generateToken({ id: 1, role: 'customer' });
+    const vehicleBase = { id: 1, make: 'Honda', model: 'Civic', category: 'Sedan', price: 20000 };
+
+    it('should return 401 if token is missing', async () => {
+      const response = await request(app).post('/api/vehicles/1/purchase').send({ quantity: 1 });
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should allow customer to purchase vehicle and decrease quantity', async () => {
+      // First query to check vehicle existence and stock
+      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 5 }] });
+      // Second query to update stock
+      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 4 }] });
+
+      const response = await request(app)
+        .post('/api/vehicles/1/purchase')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({ quantity: 1 });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'Purchase successful');
+      expect(response.body.vehicle).toHaveProperty('quantity', 4);
+    });
+
+    it('should prevent purchase when completely out of stock', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 0 }] });
+
+      const response = await request(app)
+        .post('/api/vehicles/1/purchase')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({ quantity: 1 });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Vehicle is out of stock');
+    });
+
+    it('should validate purchase quantity against available stock', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ ...vehicleBase, quantity: 2 }] });
+
+      const response = await request(app)
+        .post('/api/vehicles/1/purchase')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({ quantity: 3 }); // Trying to buy more than available
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Insufficient stock');
+    });
+
+    it('should return 404 for non-existent vehicle', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // DB returns 0 rows for vehicle check
+
+      const response = await request(app)
+        .post('/api/vehicles/999/purchase')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({ quantity: 1 });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error', 'Vehicle not found');
+    });
+  });
 });
