@@ -1,6 +1,28 @@
 import { User } from '../user.model';
+import * as db from '../../config/db';
+
+jest.mock('../../config/db', () => ({
+  query: jest.fn(),
+}));
+
+const mockQuery = db.query as jest.Mock;
 
 describe('User Model', () => {
+  beforeEach(() => {
+    mockQuery.mockClear();
+    mockQuery.mockResolvedValue({
+      rows: [
+        {
+          id: 1,
+          username: 'testuser',
+          email: 'test@example.com',
+          role: 'customer',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ],
+    });
+  });
   describe('Validation', () => {
     it('should throw an error if username is missing', async () => {
       await expect(
