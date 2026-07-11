@@ -7,39 +7,45 @@ jest.mock('../../config/db', () => ({
 
 const mockQuery = db.query as jest.Mock;
 
+import { validateUserRegistration } from '../../utils/validators';
+
 describe('User Model', () => {
   beforeEach(() => {
     mockQuery.mockClear();
-    mockQuery.mockResolvedValue({
-      rows: [
-        {
-          id: 1,
-          username: 'testuser',
-          email: 'test@example.com',
-          role: 'customer',
-          created_at: new Date(),
-          updated_at: new Date()
-        }
-      ]
+    mockQuery.mockImplementation(async (queryStr, args) => {
+      return {
+        rows: [
+          {
+            id: 1,
+            username: args ? args[0] : 'testuser',
+            email: args ? args[1] : 'test@example.com',
+            password: args ? args[2] : 'hashedpassword',
+            role: args ? args[3] : 'customer',
+            created_at: new Date(),
+            updated_at: new Date()
+          }
+        ]
+      };
     });
   });
-  describe('Validation', () => {
-    it('should throw an error if username is missing', async () => {
-      await expect(
-        User.create({ email: 'test@example.com', password: 'password123' })
-      ).rejects.toThrow('Username is required');
+
+  describe('Validation (Validators Utility)', () => {
+    it('should throw an error if username is missing', () => {
+      expect(() => {
+        validateUserRegistration({ email: 'test@example.com', password: 'password123' });
+      }).toThrow('Username is required');
     });
 
-    it('should throw an error if email is missing', async () => {
-      await expect(User.create({ username: 'testuser', password: 'password123' })).rejects.toThrow(
-        'Email is required'
-      );
+    it('should throw an error if email is missing', () => {
+      expect(() => {
+        validateUserRegistration({ username: 'testuser', password: 'password123' });
+      }).toThrow('Email is required');
     });
 
-    it('should throw an error if password is missing', async () => {
-      await expect(
-        User.create({ username: 'testuser', email: 'test@example.com' })
-      ).rejects.toThrow('Password is required');
+    it('should throw an error if password is missing', () => {
+      expect(() => {
+        validateUserRegistration({ username: 'testuser', email: 'test@example.com' });
+      }).toThrow('Password is required');
     });
   });
 
