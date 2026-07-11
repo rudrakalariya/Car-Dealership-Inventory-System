@@ -2,7 +2,7 @@ import { User } from '../user.model';
 import * as db from '../../config/db';
 
 jest.mock('../../config/db', () => ({
-  query: jest.fn(),
+  query: jest.fn()
 }));
 
 const mockQuery = db.query as jest.Mock;
@@ -18,27 +18,27 @@ describe('User Model', () => {
           email: 'test@example.com',
           role: 'customer',
           created_at: new Date(),
-          updated_at: new Date(),
-        },
-      ],
+          updated_at: new Date()
+        }
+      ]
     });
   });
   describe('Validation', () => {
     it('should throw an error if username is missing', async () => {
       await expect(
-        User.create({ email: 'test@example.com', password: 'password123' }),
+        User.create({ email: 'test@example.com', password: 'password123' })
       ).rejects.toThrow('Username is required');
     });
 
     it('should throw an error if email is missing', async () => {
       await expect(User.create({ username: 'testuser', password: 'password123' })).rejects.toThrow(
-        'Email is required',
+        'Email is required'
       );
     });
 
     it('should throw an error if password is missing', async () => {
       await expect(
-        User.create({ username: 'testuser', email: 'test@example.com' }),
+        User.create({ username: 'testuser', email: 'test@example.com' })
       ).rejects.toThrow('Password is required');
     });
   });
@@ -48,7 +48,7 @@ describe('User Model', () => {
       const user = await User.create({
         username: 'testuser',
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123'
       });
       expect(user.role).toBe('customer');
     });
@@ -58,7 +58,7 @@ describe('User Model', () => {
       const user = await User.create({
         username: 'testuser',
         email: 'test@example.com',
-        password: rawPassword,
+        password: rawPassword
       });
       expect(user.password).toBeDefined();
       expect(user.password).not.toBe(rawPassword);
@@ -71,10 +71,10 @@ describe('User Model', () => {
       const user = await User.create({
         username: 'testuser',
         email: 'test@example.com',
-        password: rawPassword,
+        password: rawPassword
       });
 
-      const isMatch = await User.comparePassword(rawPassword, user.password);
+      const isMatch = await User.comparePassword(rawPassword, user.password as string);
       expect(isMatch).toBe(true);
     });
 
@@ -82,10 +82,10 @@ describe('User Model', () => {
       const user = await User.create({
         username: 'testuser',
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123'
       });
 
-      const isMatch = await User.comparePassword('wrongpassword', user.password);
+      const isMatch = await User.comparePassword('wrongpassword', user.password as string);
       expect(isMatch).toBe(false);
     });
   });

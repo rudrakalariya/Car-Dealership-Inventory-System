@@ -3,17 +3,13 @@ import { z } from 'zod';
 import { query } from '../config/db';
 
 const UserSchema = z.object({
-  username: z
-    .string({ required_error: 'Username is required', invalid_type_error: 'Username is required' })
-    .min(3, 'Username must be at least 3 characters'),
-  email: z
-    .string({ required_error: 'Email is required', invalid_type_error: 'Email is required' })
-    .email('Invalid email format'),
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email address'),
   password: z
-    .string({ required_error: 'Password is required', invalid_type_error: 'Password is required' })
+    .string()
     .min(6, 'Password must be at least 6 characters')
     .max(20, 'Password must not exceed 20 characters'),
-  role: z.enum(['customer', 'admin']).default('customer'),
+  role: z.enum(['customer', 'admin', 'manager']).default('customer')
 });
 
 export class User {
@@ -31,7 +27,7 @@ export class User {
         `INSERT INTO users (username, email, password, role, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())
          RETURNING id, username, email, role, created_at, updated_at`,
-        [validatedData.username, validatedData.email, hashedPassword, validatedData.role],
+        [validatedData.username, validatedData.email, hashedPassword, validatedData.role]
       );
 
       // We attach the hashed password to the returned object manually just for our tests
@@ -43,12 +39,14 @@ export class User {
       if (error instanceof z.ZodError) {
         if (error.issues && error.issues.length > 0) {
           const issue = error.issues[0];
-          let message = issue.message;
-          if (message.includes('expected string, received undefined') || message === 'Required') {
-            const field = String(issue.path[0]);
-            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+          if (issue) {
+            let message = issue.message;
+            if (message.includes('expected string, received undefined') || message === 'Required') {
+              const field = String(issue.path[0]);
+              message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+            }
+            throw new Error(message, { cause: error });
           }
-          throw new Error(message, { cause: error });
         }
         throw new Error('Validation failed', { cause: error });
       }

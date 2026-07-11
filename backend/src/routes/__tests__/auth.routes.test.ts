@@ -42,5 +42,35 @@ describe('Auth Routes', () => {
       // Password should not be returned in response!
       expect(response.body).not.toHaveProperty('password');
     });
+
+    it('should return 400 if username is missing', async () => {
+      const response = await request(app).post('/api/auth/register').send({
+        email: 'testuser1@example.com',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Username is required');
+    });
+
+    it('should return 400 if email is missing', async () => {
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'testuser1',
+        password: 'password123'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Email is required');
+    });
+
+    it('should return 400 if password is missing', async () => {
+      const response = await request(app).post('/api/auth/register').send({
+        username: 'testuser1',
+        email: 'testuser1@example.com'
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Password is required');
+    });
   });
 });

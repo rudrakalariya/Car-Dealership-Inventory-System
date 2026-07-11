@@ -2,14 +2,12 @@ import { z } from 'zod';
 import { query } from '../config/db';
 
 const VehicleSchema = z.object({
-  make: z.string({ required_error: 'Make is required' }),
-  model: z.string({ required_error: 'Model is required' }),
-  category: z.string({ required_error: 'Category is required' }),
-  price: z
-    .number({ required_error: 'Price is required' })
-    .positive('Price must be a positive number'),
+  make: z.string(),
+  model: z.string(),
+  category: z.string(),
+  price: z.number().positive('Price must be a positive number'),
   quantity: z
-    .number({ required_error: 'Quantity is required' })
+    .number()
     .int('Quantity must be a non-negative integer')
     .min(0, 'Quantity must be a non-negative integer')
 });
@@ -37,16 +35,18 @@ export class Vehicle {
       if (error instanceof z.ZodError) {
         if (error.issues && error.issues.length > 0) {
           const issue = error.issues[0];
-          let message = issue.message;
-          if (
-            message.includes('expected string, received undefined') ||
-            message.includes('expected number, received undefined') ||
-            message === 'Required'
-          ) {
-            const field = String(issue.path[0]);
-            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+          if (issue) {
+            let message = issue.message;
+            if (
+              message.includes('expected string, received undefined') ||
+              message.includes('expected number, received undefined') ||
+              message === 'Required'
+            ) {
+              const field = String(issue.path[0]);
+              message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+            }
+            throw new Error(message, { cause: error });
           }
-          throw new Error(message, { cause: error });
         }
         throw new Error('Validation failed', { cause: error });
       }
