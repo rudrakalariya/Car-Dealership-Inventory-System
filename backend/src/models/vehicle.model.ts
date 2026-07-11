@@ -1,5 +1,6 @@
 import { query } from '../config/db';
 import { QueryBuilder } from '../utils/queryBuilder';
+import { validateStock } from '../utils/stockValidator';
 
 export class Vehicle {
   static async create(data: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -88,13 +89,10 @@ export class Vehicle {
     }
 
     const currentQuantity = checkResult.rows[0].quantity as number;
+    const stockError = validateStock(currentQuantity, quantity);
 
-    if (currentQuantity === 0) {
-      return { success: false, error: 'Vehicle is out of stock' };
-    }
-
-    if (currentQuantity < quantity) {
-      return { success: false, error: 'Insufficient stock' };
+    if (stockError) {
+      return { success: false, error: stockError };
     }
 
     // 2. Perform purchase update
