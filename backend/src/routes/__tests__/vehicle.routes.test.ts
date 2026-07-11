@@ -149,4 +149,95 @@ describe('Vehicle Routes', () => {
       expect(response.body[1]).toHaveProperty('make', 'Honda');
     });
   });
+
+  describe('GET /api/vehicles/search', () => {
+    it('should return 401 if token is missing', async () => {
+      const response = await request(app).get('/api/vehicles/search?make=Toyota');
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should search by make (case-insensitive)', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 1, make: 'Toyota', model: 'Corolla' }] });
+
+      const response = await request(app)
+        .get('/api/vehicles/search?make=toyota')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+      // We expect the query to contain some form of ILIKE or LOWER() for case-insensitivity
+      expect(mockQuery.mock.calls[0][0].toLowerCase()).toContain('ilike');
+    });
+
+    it('should search by model', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 1, make: 'Toyota', model: 'Corolla' }] });
+
+      const response = await request(app)
+        .get('/api/vehicles/search?model=Corolla')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+      expect(mockQuery.mock.calls[0][0].toLowerCase()).toContain('model');
+    });
+
+    it('should search by category', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 1, make: 'Toyota', category: 'Sedan' }] });
+
+      const response = await request(app)
+        .get('/api/vehicles/search?category=Sedan')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+    });
+
+    it('should search by price range (min/max)', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 1, make: 'Toyota', price: 20000 }] });
+
+      const response = await request(app)
+        .get('/api/vehicles/search?minPrice=15000&maxPrice=25000')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+      const queryString = mockQuery.mock.calls[0][0].toLowerCase();
+      expect(queryString).toContain('price >=');
+      expect(queryString).toContain('price <=');
+    });
+
+    it('should handle combined filters', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, make: 'Toyota', model: 'Corolla', category: 'Sedan' }]
+      });
+
+      const response = await request(app)
+        .get('/api/vehicles/search?make=Toyota&category=Sedan')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+      const queryString = mockQuery.mock.calls[0][0].toLowerCase();
+      expect(queryString).toContain('make ilike');
+      expect(queryString).toContain('category ilike');
+    });
+
+    it('should handle empty results gracefully', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+
+      const response = await request(app)
+        .get('/api/vehicles/search?make=NonExistentMake')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
+    });
+  });
 });
