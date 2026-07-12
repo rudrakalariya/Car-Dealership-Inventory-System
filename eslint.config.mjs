@@ -10,6 +10,7 @@ export default tseslint.config(
       'dist/**', 
       'backend/dist/**', 
       'frontend/dist/**',
+      'frontend/**',
       'coverage/**',
       '.next/**',
       '.nuxt/**',
