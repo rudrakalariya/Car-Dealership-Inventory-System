@@ -52,6 +52,7 @@ export const VehicleSchema = z.object({
   make: z.string(),
   model: z.string(),
   category: z.string(),
+  description: z.string().optional(),
   price: z.number().positive('Price must be a positive number'),
   quantity: z
     .number()

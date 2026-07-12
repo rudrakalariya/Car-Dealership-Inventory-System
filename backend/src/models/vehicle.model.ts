@@ -5,10 +5,10 @@ import { validateStock } from '../utils/stockValidator';
 export class Vehicle {
   static async create(data: Record<string, unknown>): Promise<Record<string, unknown>> {
     const result = await query(
-      `INSERT INTO vehicles (make, model, category, price, quantity, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-       RETURNING id, make, model, category, price, quantity, created_at, updated_at`,
-      [data.make, data.model, data.category, data.price, data.quantity]
+      `INSERT INTO vehicles (make, model, category, description, price, quantity, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+       RETURNING id, make, model, category, description, price, quantity, created_at, updated_at`,
+      [data.make, data.model, data.category, data.description, data.price, data.quantity]
     );
 
     return result.rows[0];
@@ -16,7 +16,7 @@ export class Vehicle {
 
   static async getAll(): Promise<Record<string, unknown>[]> {
     const result = await query(
-      `SELECT id, make, model, category, price, quantity, created_at, updated_at 
+      `SELECT id, make, model, category, description, price, quantity, image_url, created_at, updated_at 
        FROM vehicles 
        ORDER BY created_at DESC`
     );
@@ -31,7 +31,18 @@ export class Vehicle {
     maxPrice?: string;
   }): Promise<Record<string, unknown>[]> {
     const { text, values } = new QueryBuilder('vehicles')
-      .select(['id', 'make', 'model', 'category', 'price', 'quantity', 'created_at', 'updated_at'])
+      .select([
+        'id',
+        'make',
+        'model',
+        'category',
+        'description',
+        'price',
+        'quantity',
+        'image_url',
+        'created_at',
+        'updated_at'
+      ])
       .whereIlike('make', filters.make)
       .whereIlike('model', filters.model)
       .whereIlike('category', filters.category)

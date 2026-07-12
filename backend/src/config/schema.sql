@@ -26,8 +26,10 @@ CREATE TABLE IF NOT EXISTS vehicles (
     make VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
+    description TEXT,
     price NUMERIC(12, 2) NOT NULL CHECK (price > 0),
     quantity INTEGER NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+    image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

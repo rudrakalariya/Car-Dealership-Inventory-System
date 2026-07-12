@@ -3,14 +3,20 @@ import { VehicleController } from '../controllers/vehicle.controller';
 import {
   authenticateToken,
   authenticateCustomer,
+  authenticateCustomerOrAdmin,
   authenticateAdmin
 } from '../middleware/auth.middleware';
 
 const router = Router();
 
 router.post('/', authenticateToken, authenticateAdmin, VehicleController.createVehicle);
-router.get('/search', authenticateToken, authenticateCustomer, VehicleController.searchVehicles);
-router.get('/', authenticateToken, authenticateCustomer, VehicleController.getAllVehicles);
+router.get(
+  '/search',
+  authenticateToken,
+  authenticateCustomerOrAdmin,
+  VehicleController.searchVehicles
+);
+router.get('/', authenticateToken, authenticateCustomerOrAdmin, VehicleController.getAllVehicles);
 router.put('/:id', authenticateToken, authenticateAdmin, VehicleController.updateVehicle);
 router.delete('/:id', authenticateToken, authenticateAdmin, VehicleController.deleteVehicle);
 router.post(
