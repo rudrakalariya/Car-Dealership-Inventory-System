@@ -8,10 +8,10 @@ import {
 
 const router = Router();
 
-router.post('/', authenticateToken, authenticateCustomer, VehicleController.createVehicle);
+router.post('/', authenticateToken, authenticateAdmin, VehicleController.createVehicle);
 router.get('/search', authenticateToken, authenticateCustomer, VehicleController.searchVehicles);
 router.get('/', authenticateToken, authenticateCustomer, VehicleController.getAllVehicles);
-router.put('/:id', authenticateToken, authenticateCustomer, VehicleController.updateVehicle);
+router.put('/:id', authenticateToken, authenticateAdmin, VehicleController.updateVehicle);
 router.delete('/:id', authenticateToken, authenticateAdmin, VehicleController.deleteVehicle);
 router.post(
   '/:id/purchase',

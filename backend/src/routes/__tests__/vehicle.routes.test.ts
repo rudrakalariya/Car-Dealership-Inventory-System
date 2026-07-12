@@ -44,8 +44,25 @@ describe('Vehicle Routes', () => {
       expect(response.body).toHaveProperty('error');
     });
 
-    it('should return 201 and create vehicle on successful request with valid token', async () => {
+    it('should reject non-admin users with 403', async () => {
       const validToken = generateToken({ id: 1, role: 'customer' });
+      const response = await request(app)
+        .post('/api/vehicles')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({
+          make: 'Toyota',
+          model: 'Corolla',
+          category: 'Sedan',
+          price: 20000,
+          quantity: 5
+        });
+
+      expect(response.status).toBe(403);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should return 201 and create vehicle on successful request with valid token', async () => {
+      const validToken = generateToken({ id: 1, role: 'admin' });
 
       mockQuery.mockResolvedValueOnce({
         rows: [
@@ -257,8 +274,19 @@ describe('Vehicle Routes', () => {
       expect(response.body).toHaveProperty('error');
     });
 
-    it('should update all fields with valid data', async () => {
+    it('should reject non-admin users with 403', async () => {
       const validToken = generateToken({ id: 1, role: 'customer' });
+      const response = await request(app)
+        .put('/api/vehicles/1')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send(updateData);
+
+      expect(response.status).toBe(403);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should update all fields with valid data', async () => {
+      const validToken = generateToken({ id: 1, role: 'admin' });
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
@@ -282,7 +310,7 @@ describe('Vehicle Routes', () => {
     });
 
     it('should support partial field updates', async () => {
-      const validToken = generateToken({ id: 1, role: 'customer' });
+      const validToken = generateToken({ id: 1, role: 'admin' });
       const partialData = { price: 26000 };
 
       mockQuery.mockResolvedValueOnce({
@@ -301,7 +329,7 @@ describe('Vehicle Routes', () => {
     });
 
     it('should return 404 for non-existent vehicles', async () => {
-      const validToken = generateToken({ id: 1, role: 'customer' });
+      const validToken = generateToken({ id: 1, role: 'admin' });
       mockQuery.mockResolvedValueOnce({ rows: [] }); // Simulate DB returning 0 rows
 
       const response = await request(app)
@@ -314,7 +342,7 @@ describe('Vehicle Routes', () => {
     });
 
     it('should validate and reject invalid data', async () => {
-      const validToken = generateToken({ id: 1, role: 'customer' });
+      const validToken = generateToken({ id: 1, role: 'admin' });
       const invalidData = { price: -5000 }; // Negative price should fail validation
 
       const response = await request(app)
