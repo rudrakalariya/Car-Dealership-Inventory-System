@@ -15,6 +15,13 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message:
+      'Welcome to the Car Dealership API. TODO: Serve React frontend from here in production.'
+  });
+});
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',

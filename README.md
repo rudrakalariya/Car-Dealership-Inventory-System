@@ -61,9 +61,9 @@ This application provides a complete inventory management solution for a car dea
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌────────────────┐     ┌──────────────┐
-│   Client     │────▶│   Routes     │────▶│  Controllers   │────▶│   Models     │
-│  (Postman /  │     │  + Middleware │     │  + Validators  │     │  (Raw SQL)   │
-│   React)     │◀────│  (Auth/RBAC) │◀────│                │◀────│              │
+│   Client    │────▶│   Routes     │────▶│  Controllers   │────▶│   Models     │
+│  (Postman / │     │  + Middleware │     │  + Validators  │     │  (Raw SQL)   │
+│   React)    │◀─── │  (Auth/RBAC) │◀───|                │◀────│              │
 └─────────────┘     └──────────────┘     └────────────────┘     └──────────────┘
                                                                        │
                                                                        ▼
@@ -329,10 +329,10 @@ Returns a JWT token:
 
 | Method | Endpoint                     | Role Required | Description                       |
 | ------ | ---------------------------- | ------------- | --------------------------------- |
-| POST   | `/api/vehicles`              | `customer`    | Create a new vehicle              |
+| POST   | `/api/vehicles`              | `admin`       | Create a new vehicle              |
 | GET    | `/api/vehicles`              | `customer`    | List all vehicles                 |
 | GET    | `/api/vehicles/search`       | `customer`    | Search vehicles with filters      |
-| PUT    | `/api/vehicles/:id`          | `customer`    | Update vehicle (full or partial)  |
+| PUT    | `/api/vehicles/:id`          | `admin`       | Update vehicle (full or partial)  |
 | DELETE | `/api/vehicles/:id`          | `admin`       | Delete a vehicle                  |
 | POST   | `/api/vehicles/:id/purchase` | `customer`    | Purchase vehicle (decrease stock) |
 | POST   | `/api/vehicles/:id/restock`  | `admin`       | Restock vehicle (increase stock)  |
