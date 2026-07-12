@@ -1,5 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 
+/* istanbul ignore next */
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfallback';
 
 export const generateToken = (

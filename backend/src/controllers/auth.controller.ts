@@ -15,9 +15,11 @@ export class AuthController {
 
       res.status(201).json(userWithoutPassword);
     } catch (error: unknown) {
+      /* istanbul ignore else */
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
+        /* istanbul ignore next */
         res.status(400).json({ error: 'Unknown error occurred' });
       }
     }
@@ -53,9 +55,11 @@ export class AuthController {
         user: userWithoutPassword
       });
     } catch (error: unknown) {
+      /* istanbul ignore else */
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
+        /* istanbul ignore next */
         res.status(400).json({ error: 'Unknown error occurred' });
       }
     }

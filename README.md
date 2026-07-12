@@ -411,7 +411,7 @@ npx jest -t "POST /api/auth/register"
 
 ### Test Coverage
 
-The test suite includes **63 test cases across 6 test suites** covering:
+The test suite includes **74 test cases across 6 test suites** covering:
 
 | Module            | Test Cases                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------- |
@@ -420,6 +420,10 @@ The test suite includes **63 test cases across 6 test suites** covering:
 | **Vehicle CRUD**  | Create with auth, list all, search with filters, update (full/partial), delete                    |
 | **RBAC**          | 401 for missing tokens, 403 for unauthorized roles, admin-only endpoints                          |
 | **Inventory**     | Purchase with stock reduction, out-of-stock handling, insufficient stock, restock                 |
+
+#### Coverage Proof
+
+![Test Coverage](./screenshots/coverage.png)
 
 ---
 

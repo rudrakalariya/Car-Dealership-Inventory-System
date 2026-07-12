@@ -165,6 +165,18 @@ describe('Vehicle Routes', () => {
       expect(response.body[0]).toHaveProperty('make', 'Toyota');
       expect(response.body[1]).toHaveProperty('make', 'Honda');
     });
+
+    it('should return 500 if database query fails', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .get('/api/vehicles')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to retrieve vehicles');
+    });
   });
 
   describe('GET /api/vehicles/search', () => {
@@ -255,6 +267,30 @@ describe('Vehicle Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual([]);
+    });
+
+    it('should return 500 if database query fails during search', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .get('/api/vehicles/search?make=Toyota')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to search vehicles');
+    });
+
+    it('should search with empty query builder when no filters provided', async () => {
+      const validToken = generateToken({ id: 1, role: 'customer' });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 1, make: 'Toyota' }] });
+
+      const response = await request(app)
+        .get('/api/vehicles/search')
+        .set('Authorization', `Bearer ${validToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
     });
   });
 
@@ -353,6 +389,34 @@ describe('Vehicle Routes', () => {
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
     });
+
+    it('should return 400 for invalid vehicle ID', async () => {
+      const validToken = generateToken({ id: 1, role: 'admin' });
+      const response = await request(app)
+        .put('/api/vehicles/abc')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send(updateData);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid vehicle ID');
+    });
+
+    it('should support empty updates and return existing vehicle', async () => {
+      const validToken = generateToken({ id: 1, role: 'admin' });
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          { id: 1, make: 'Toyota', model: 'Camry', category: 'Sedan', quantity: 10, price: 25000 }
+        ]
+      });
+
+      const response = await request(app)
+        .put('/api/vehicles/1')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({});
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('make', 'Toyota');
+    });
   });
 
   describe('DELETE /api/vehicles/:id', () => {
@@ -396,6 +460,28 @@ describe('Vehicle Routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error');
+    });
+
+    it('should return 400 for invalid vehicle ID', async () => {
+      const adminToken = generateToken({ id: 2, role: 'admin' });
+      const response = await request(app)
+        .delete('/api/vehicles/abc')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid vehicle ID');
+    });
+
+    it('should return 500 if database query fails', async () => {
+      const adminToken = generateToken({ id: 2, role: 'admin' });
+      mockQuery.mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .delete('/api/vehicles/1')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to delete vehicle');
     });
   });
 
@@ -460,6 +546,16 @@ describe('Vehicle Routes', () => {
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'Vehicle not found');
     });
+
+    it('should return 400 for invalid vehicle ID', async () => {
+      const response = await request(app)
+        .post('/api/vehicles/abc/purchase')
+        .set('Authorization', `Bearer ${validToken}`)
+        .send({ quantity: 1 });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid vehicle ID');
+    });
   });
 
   describe('POST /api/vehicles/:id/restock', () => {
@@ -517,6 +613,16 @@ describe('Vehicle Routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'Vehicle not found');
+    });
+
+    it('should return 400 for invalid vehicle ID', async () => {
+      const response = await request(app)
+        .post('/api/vehicles/abc/restock')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ quantity: 5 });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid vehicle ID');
     });
   });
 });

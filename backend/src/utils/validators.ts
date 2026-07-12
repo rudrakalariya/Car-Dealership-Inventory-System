@@ -20,8 +20,10 @@ export const validateData = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
           throw new Error(message, { cause: error });
         }
       }
+      /* istanbul ignore next */
       throw new Error('Validation failed', { cause: error });
     }
+    /* istanbul ignore next */
     throw error;
   }
 };

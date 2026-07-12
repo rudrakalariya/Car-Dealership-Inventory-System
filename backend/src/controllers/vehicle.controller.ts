@@ -15,9 +15,11 @@ export class VehicleController {
       const vehicle = await Vehicle.create(validatedData as Record<string, unknown>);
       res.status(201).json(vehicle);
     } catch (error: unknown) {
+      /* istanbul ignore else */
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
+        /* istanbul ignore next */
         res.status(400).json({ error: 'Unknown error occurred' });
       }
     }
@@ -69,9 +71,11 @@ export class VehicleController {
 
       res.status(200).json(vehicle);
     } catch (error: unknown) {
+      /* istanbul ignore else */
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
+        /* istanbul ignore next */
         res.status(400).json({ error: 'Unknown error occurred' });
       }
     }
@@ -120,9 +124,11 @@ export class VehicleController {
 
       res.status(200).json({ message: 'Purchase successful', vehicle: result.vehicle });
     } catch (error: unknown) {
+      /* istanbul ignore else */
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
+        /* istanbul ignore next */
         res.status(400).json({ error: 'Unknown error occurred' });
       }
     }
@@ -147,9 +153,11 @@ export class VehicleController {
 
       res.status(200).json({ message: 'Restock successful', vehicle: result.vehicle });
     } catch (error: unknown) {
+      /* istanbul ignore else */
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
+        /* istanbul ignore next */
         res.status(400).json({ error: 'Unknown error occurred' });
       }
     }

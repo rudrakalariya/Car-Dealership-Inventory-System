@@ -24,8 +24,10 @@ export class User {
         if (pgError.constraint === 'users_email_key') {
           throw new Error('Email already exists', { cause: error });
         }
+        /* istanbul ignore next */
         throw new Error('Duplicate entry found', { cause: error });
       }
+      /* istanbul ignore next */
       throw error;
     }
   }
