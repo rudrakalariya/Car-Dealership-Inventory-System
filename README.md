@@ -38,6 +38,38 @@ This application provides a complete inventory management solution for a car dea
 - **Inventory Management** — Customers can purchase vehicles (decreasing stock), and admins can restock vehicles (increasing stock).
 - **Role-Based Access Control (RBAC)** — Routes are protected by role (`customer` or `admin`) ensuring only authorized users can perform sensitive operations like deleting vehicles or restocking inventory.
 
+### 🎨 Frontend Features
+
+The modern React-based Single Page Application (SPA) provides a premium, seamless user experience:
+
+- **Beautiful UI/UX** — Designed with a dark, sleek aesthetic utilizing Tailwind CSS, Framer Motion for micro-animations, and Shadcn UI components.
+- **Dynamic Catalogue** — Interactive vehicle browsing with real-time filtering, search, and dynamic image loading from Unsplash.
+- **3D Hero Integration** — A stunning interactive 3D Porsche model integrated directly into the landing page for a premium dealership feel.
+- **Admin Dashboard** — A dedicated, secure management interface for admins to add, edit, delete, and restock vehicles effortlessly.
+- **Robust Client-Side Routing** — Powered by TanStack Router for type-safe, fast navigation.
+
+---
+
+## 📸 Screenshots
+
+Here is a visual walkthrough of the DriveHub frontend experience:
+
+|                Landing Page                |            Interactive Catalogue            |
+| :----------------------------------------: | :-----------------------------------------: |
+| ![Home Page](./screenshots/1-HomePage.png) | ![Catalogue](./screenshots/5-Catalogue.png) |
+
+|                Sign In                 |                Sign Up                 |
+| :------------------------------------: | :------------------------------------: |
+| ![Sign In](./screenshots/2-SignIn.png) | ![Sign Up](./screenshots/3-SignUp.png) |
+
+|                       Authenticated Home                       |                Admin Dashboard                |
+| :------------------------------------------------------------: | :-------------------------------------------: |
+| ![Home After Sign In](./screenshots/4-HomePageAfterSignIn.png) | ![Admin Dashboard](./screenshots/6-Admin.png) |
+
+|             Add/Edit Vehicle Modal             |
+| :--------------------------------------------: |
+| ![Add Vehicle](./screenshots/7-AddVehicle.png) |
+
 ---
 
 ## 🛠 Tech Stack
